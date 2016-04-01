@@ -1,0 +1,6 @@
+1. elevator cars can hold 9 riders
+2. riders will automatically board an elevator when it's door opens and it's heading the right direction
+3. riders will automatically disembark an elevator on their floor
+4. riders will automatically disembark an elevator which is not going their direction
+5. cars will accrue score based on time the rider waited before arriving at their floor
+6. lower scores are better
