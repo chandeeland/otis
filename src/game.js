@@ -1,42 +1,68 @@
-include 'building.js';
-include 'car.js';
-include 'rider.js';
+var uuid = require('node-uuid');
+var Building = require('building.js');
+var Car = require('car.js');
+var Rider = require('rider.js');
 
-var GAME = (function(floors_count) {
+var MAX_FLOORS = 14;
+var CARS_PER_PLAYER = 2;
+var LOAD_DELAY = 2;
+var MOVE_DELAY = 10;
+var MAX_RIDERS = 9;
+var UP = 'UP';
+var DOWN = 'DOWN'
+
+var GAME = (function(MAX_FLOORS) {
   var game = {
-    building: new Building(floors_count)
+    building: new Building(MAX_FLOORS)
+    findCar = function(playerId, carId) {
+      cars = building.getCars(playerId)
+        .filter(function(car) { return car.id == carId; });
+      if (cars.length = 0) {
+        // emit error
+      }
+      return cars.shift();
+    };
   };
 
-  game.newPlayer = function(playerId) {
-    this.building.addCar(playerId);
-    this.building.addCar(playerId);
+  game.newPlayer = function() {
+    var playerId = uuid.v4();
+    for (var i = 0; i < CARS_PER_PLAYER; i++) {
+      building.addCar(playerId);
+    }
+    return playerId;
   }
 
-  game.moveCarUp= function(playerId, id) {
-    cars = this.building.getCars(playerId)
-      .filter(function(car) { return car.id == id; });
-    return cars[0].move('UP');
+  game.moveCarUp= function(playerId, carId) {
+    var car = findCar(playerId, carId)
+    if (car) return car.move('UP');
   };
 
-  game.moveCarDown= function(playerId, id) {
-    cars = this.building.getCars(playerId)
-      .filter(function(car) { return car.id == id; });
-    return cars[0].move('DOWN');
+  game.moveCarDown= function(playerId, carId) {
+    var car = findCar(playerId, carId)
+    if (car) return car.move('DOWN');
   };
 
-  this.status = function(playerId) {
+  game.setIndicatorLightUp = function(playerId, carId) {
+    var car = findCar(playerId, carId)
+    if (car) return car.setDirectionIndicator('UP');
+  };
+
+  game.setIndicatorLightDown = function(playerId, carId) {
+    var car = findCar(playerId, carId)
+    if (car) return car.setDirectionIndicator('DOWN');
+  };
+
+  game.openCarDoor = function(playerId, carId) {
+    var car = findCar(playerId, carId)
+    if (car) return car.openDoor();
+  };
+
+  game.status = function(playerId) {
     var status = {};
-      status['cars'] = this.building.getCars(playerId).map(
+      status['cars'] = building.getCars(playerId).map(
         function(car) { return car.status(); }
       );
-      status['calls'] = this.building.floors.map(function(riders) {
-        var calls = {};
-        calls['UP'] = riders.filter(
-          function(rider) {return ider.direction() == 'UP';}
-        ).length;
-        calls['DOWN'] = riders.length - calls['UP'];
-        return calls;
-      });
+      status['calls'] = building.status();
       return status;
     };
   return  game;
