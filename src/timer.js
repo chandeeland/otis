@@ -1,10 +1,9 @@
-function Timer(func, ms) {
+function Timer(func, delay) {
   var done = false;
   var callback = function() {
-    done = true;
+    done = true ;
     return func();
   };
-  var delay = ms;
   var startTime = Date.now();
 
   var timeout = setTimeout(callback, delay);
@@ -23,8 +22,52 @@ function Timer(func, ms) {
 
   this.immediately = function() {
     if (!done) {
-      this.cancel();      
+      this.cancel();
       callback();
     }
   };
 };
+
+function TimerLoop(func, interval, doneCondition = null) {
+  var done = null;
+  var callback = null;
+
+  var setCallback = function(func) {
+    callback = function() {
+      if (!done()) {
+        timeout = setTimeout(callback, interval);
+        func();
+      }
+    };
+  };
+
+  var setDone(f) {
+    if (typeof(f) == 'function') {
+      done = f;
+    } else {
+      done = function() {
+        return f;
+      }
+    }
+  }
+
+  setCallback(func);
+  setDone(doneCondition);
+  var timeout = setTimeout(callback, interval);
+
+  return {
+    stop: function(doneCondition = true) {
+      clearTimeout(timeout);
+      setDone(doneCondition);
+    },
+    start: function(doneCondition = false) {
+      setDone(doneCondition);
+    },
+    restart: function(func, doneCondition= false) {
+      if (timeout != null) clearTimeout(timeout);
+      setCallback(func);
+      setDone(doneCondition);
+      timeout = setTimeout(callback, interval);
+    }
+  };
+}

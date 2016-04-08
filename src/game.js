@@ -5,8 +5,8 @@ var Rider = require('rider.js');
 
 var MAX_FLOORS = 14;
 var CARS_PER_PLAYER = 2;
-var LOAD_DELAY = 2;
-var MOVE_DELAY = 10;
+var LOAD_DELAY = 500;
+var MOVE_DELAY = 200;
 var MAX_RIDERS = 9;
 var UP = 'UP';
 var DOWN = 'DOWN'

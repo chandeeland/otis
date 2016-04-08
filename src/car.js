@@ -11,53 +11,38 @@ function Car(playerId, building, id) {
 
   var riders = [];
 
-  var currentFloor = 1;
+  var currentFloor = 1.0;
   var directionIndicator = null;
   var score = 0;
-  var arrivalTime = null;
-  var riderLoadTime = null;
+  var moveTimer = null;
+  var riderLoadTimer = null;
 
-  loadRiders() {
-    var capacity = MAX_RIDERS - riders.length;
-    var numLostRiders = 0;
-    var i = riders.length;
+  unloadRiders = function() {
+    var finder = function(rider, i, arr) {
+      return rider.wants_off();
+    };
 
-    while(--i) {
-      if (riders[i].wants_off(currentFloor, directionIndicator)) {
-        score += building.takeRider(riders[i], currentFloor);
-        riders.splice(i, 1);
-        numLostRiders++;
+    if (var i = riders.findIndex(finder)) {
+      score += building.takeRider(riders[i], currentFloor);
+      riders.splice(i,1);
+      return 1;
+    }
+    return 0;
+  };
+
+  loadRiders = function() {
+    if (MAX_RIDERS > riders.length) {
+      if (var rider = building.getRider(currentFloor, directionIndicator)) {
+        riders.push(rider);
+        return 1
       }
     }
-    capacity += numLostRiders;
-
-    var newRiders = building.floors[currentFloor]
-      .filter(function(r) {
-        return r.wants_on(currentFloor, directionIndicator);
-      })
-      .slice(0,capacity);
-
-    riders = riders.concat(newRiders);
-
-    reutrn (newRiders.length + numLostRiders) * LOAD_DELAY;
+    return 0;
   };
 
-  setCurrentFloor = function(f) {
-    if (doorState != 'CLOSED') {
-      //emit error
-      return false;
-    }
-    clearTimeout(arrivalTime);
-    arrivalTime = setTimeout(function() {
-      currentFloor = f;
-      carState = 'HOLDING'
-    }, MOVE_DELAY);
-
-    return carState;
-  };
-
-  closeDoor = function() {
+  this.closeDoor = function() {
     doorState = 'CLOSED';
+    riderLoadTimer.stop();
   };
 
 
@@ -67,8 +52,9 @@ function Car(playerId, building, id) {
     }
     if (doorState != 'OPEN') {
       doorState = 'OPEN';
-      clearTimeout(riderLoadTime);
-      riderLoadTime = setTimeout(closeDoor, loadRiders());
+      riderLoadTimer = new TimerLoop(function() {
+        return unloadRiders() && loadRiders();
+      }, LOAD_DELAY);
     }
   };
 
@@ -80,19 +66,41 @@ function Car(playerId, building, id) {
     directionIndicator = d;
   };
 
-  this.move = function(d) {
-    var deltas = {
-      UP: 1,
-      DOWN: -1
+  moveTimer = null;
+  moveIncrement = function(step) {
+    return function() {
+      carState = 'MOVING';
+      currentFloor += step;
     };
-    if (deltas[d] != undefined) {
-      var newFloor = currentFloor + deltas[d];
-      if (building.floors.length > newFloor && newFloor > 0) {
-        if (carState != 'GOING '+ d) {
-          carState = 'GOING '+ d;
-          return this.setCurrentFloor(newFloor);
-        }
-      }
+  };
+  moveDone = function(destination) {
+    return function() {
+      if (currentFloor == destination) {
+        carState = 'HOLDING';
+        return true;
+      };
+      return false;
+    };
+  }
+
+  this.move = function(destination) {
+    if (doorState != 'CLOSED') {
+      //emit error
+      return false;
+    }
+    if (building.floors.length > newFloor && newFloor > 0) {
+      // error, out of range
+      return false;
+    }
+
+    var step = (currentFloor > destination) ? -0.2 : 0.2);
+
+    if (moveTimer == null) {
+      moveTimer = new TimeLoop(
+        moveIncrement(step), MOVE_DELAY, moveDone(destination)
+      );
+    } else {
+      moveTimer.restart(moveIncrement(step), moveDone(destination))
     }
     return carState;
   };

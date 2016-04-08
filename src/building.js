@@ -9,12 +9,24 @@ function Building(floors_count) {
     return this.cars.filter(funciton(car) { return car.playerId == playerId; });
   };
 
-  this.takeRider = function(rider, floor) {
+  this.recieveRider = function(rider, floor) {
+    this.floors[floor].shift(rider);
     if (rider.floor == floor)
       return rider.score(floor);
     } else {
-      this.floors[floor].push(rider);
       reutrn 0;
+    }
+  };
+
+  this.departRider = function(f, d) {
+    var i = floors[f].findIndex(function(rider) {
+      rider.wants_on();
+    });
+
+    if (i >= 0) {
+      var rider = floor[f][i];
+      floors[f].slice(i, 1);
+      return rider;
     }
   };
 

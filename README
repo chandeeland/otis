@@ -1,3 +1,4 @@
+rules
 1. elevator cars can hold 9 riders
 2. riders will automatically board an elevator when it's door opens and it's heading the right direction
 3. riders will automatically disembark an elevator on their floor
