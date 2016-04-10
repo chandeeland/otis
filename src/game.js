@@ -1,15 +1,14 @@
-var uuid = require('node-uuid');
-var Building = require('building.js');
-var Car = require('car.js');
-var Rider = require('rider.js');
-
-var MAX_FLOORS = 14;
-var CARS_PER_PLAYER = 2;
-var LOAD_DELAY = 500;
-var MOVE_DELAY = 200;
-var MAX_RIDERS = 9;
-var UP = 'UP';
-var DOWN = 'DOWN'
+var uuid = require('node-uuid'),
+  Building = require('building.js'),
+  Car = require('car.js'),
+  Rider = require('rider.js'),
+  MAX_FLOORS = 14,
+  CARS_PER_PLAYER = 2,
+  LOAD_DELAY = 500,
+  MOVE_DELAY = 200,
+  MAX_RIDERS = 9,
+  UP = 'UP',
+  DOWN = 'DOWN';
 
 var GAME = (function(MAX_FLOORS) {
   var game = {

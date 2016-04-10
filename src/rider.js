@@ -1,62 +1,57 @@
-function Rider() {
-  var desiredFloor = null;
-  var start = Date.now();
-  var active = true;
+"use strict";
 
-  var script = [
-    function() { this.wait(30);},
-    function() { this.setFloor(4);},
-    function() { this.wait(180);}
-    function() { this.setFloor(1);},
-    function() { this.wait(45);}
-    function() { this.setFloor(4);},
-    function() { this.wait(240);}
-    function() { this.setFloor(1);},
+function Rider() {
+  var desiredFloor = null,
+    start = Date.now(),
+    script = [],
+    active = true,
+
+    runScript = function (script) {
+      start = Date.now();
+      return script[0].call(this, script[1]);
+    },
+
+    setFloor = function (f) {
+      desiredFloor = f;
+      if (f !== null) { active = true; }
+    },
+
+    wait = function (t) {
+      active = false;
+      setFloor(null);
+      setTimeout(runScript(script.shift), t);
+    };
+
+  script = [
+    [wait, 30 ],
+    [setFloor, 4 ],
+    [wait, 180],
+    [setFloor, 1 ],
+    [wait, 45],
+    [setFloor, 4 ],
+    [wait, 240],
+    [setFloor, 1 ],
   ];
 
-  runScript() {
-    f = script.shift();
-    start = Date.now();
-    return f();
-  }
-
-  wait = function(t) {
-    active = false;
-    setFloor(null);
-    setTimeout(this.runScript, t);
-  };
-
-  setFloor = function(f) {
-    desiredFloor = f;
-    if (f != null) active = true;
-  }
-
-  this.wants = function(f) {
+  this.wants = function (f) {
     if (active) {
-      if (this.desiredFloor > f) {
-        return 'UP';
-      } else if (this.desiredFloor < f) {
-        return 'DOWN';
-      }
+      if (desiredFloor > f) { return 'UP'; }
+      if (desiredFloor < f) { return 'DOWN'; }
     }
     return 'OFF';
   };
 
-  this.wants_off = function(f, d) {
-    return d != wants(f);
+  this.wants_off = function (f, d) {
+    return d !== this.wants(f);
   };
 
-  this.wants_on = function(f, d) {
-    return !wants_off(f, d) && rider.active;
+  this.wants_on = function (f, d) {
+    return !this.wants_off(f, d) && active;
   };
 
-  this.hasArrived = function(f) {
-    return arrived && desiredFloor = f;
-  };
-
-  this.prize = function() {
+  this.prize = function () {
     var current_time = Date.now();
-    return Math.abs(this.start - current_time);
+    return Math.abs(start - current_time);
   };
 
-};
+}
